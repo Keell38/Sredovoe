@@ -1,0 +1,76 @@
+import os
+import json
+import random
+import datetime
+import logging
+from telegram import Bot
+
+TOKEN = "6566470004:AAESG2qZl_JCtgCi48nEw-5s6-aKT2gVisk"  # Замените на свой API токен бота
+CHAT_ID = "5689375703"  # Замените на ID чата, куда хотите отправлять сообщения
+
+# Получаем абсолютный путь к текущему скрипту и присоединяем папку с изображениями
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+IMAGES_DIR = os.path.join(CURRENT_DIR, "images")
+
+JSON_FILE = os.path.join(CURRENT_DIR, "used_images.json")  # Файл для хранения использованных картинок
+
+
+# Настройки логгирования
+LOG_FILE = os.path.join(CURRENT_DIR, "bot.log")
+logging.basicConfig(filename=LOG_FILE, format='%(asctime)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
+# Функция для получения случайной картинки из директории
+def get_random_image():
+    image_list = os.listdir(IMAGES_DIR)
+    used_images = load_used_images()
+
+    # Исключаем использованные картинки из списка доступных
+    available_images = [image for image in image_list if image not in used_images]
+
+    if not available_images:
+        # Если все картинки использованы, обновляем список
+        reset_used_images()
+        available_images = image_list
+
+    # Выбираем случайную картинку и добавляем ее в список использованных
+    chosen_image = random.choice(available_images)
+    used_images.append(chosen_image)
+    save_used_images(used_images)
+
+    return chosen_image
+
+# Функция для загрузки списка использованных картинок из файла JSON
+def load_used_images():
+    if os.path.exists(JSON_FILE):
+        with open(JSON_FILE, "r") as file:
+            return json.load(file)
+    else:
+        return []
+
+# Функция для сохранения списка использованных картинок в файл JSON
+def save_used_images(used_images):
+    with open(JSON_FILE, "w") as file:
+        json.dump(used_images, file)
+
+# Функция для сброса списка использованных картинок (каждую среду)
+def reset_used_images():
+    os.remove(JSON_FILE)
+
+def main():
+    bot = Bot(token=TOKEN)
+
+    logging.info("Бот успешно запущен.")
+
+    day_of_week = datetime.datetime.today().weekday()
+
+    if day_of_week == 2:  # Проверяем, что сегодня среда
+        logging.info("Сегодня среда. Отправка картинки...")
+        image_file = get_random_image()
+        with open(os.path.join(IMAGES_DIR, image_file), "rb") as file:
+            bot.send_photo(CHAT_ID, file, caption="Сегодня среда, мои чуваки!")
+        logging.info("Картинка успешно отправлена.")
+    else:
+        logging.info("Сегодня не среда. Завершение работы.")
+
+if __name__ == "__main__":
+    main()
