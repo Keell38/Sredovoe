@@ -5,8 +5,8 @@ import datetime
 import logging
 from telegram import Bot
 
-TOKEN = "6566470004:AAESG2qZl_JCtgCi48nEw-5s6-aKT2gVisk"  # Замените на свой API токен бота
-CHAT_ID = "5689375703"  # Замените на ID чата, куда хотите отправлять сообщения
+TOKEN = ""  # Замените на свой API токен бота
+CHAT_ID = ""  # Замените на ID чата, куда хотите отправлять сообщения
 
 # Получаем абсолютный путь к текущему скрипту и присоединяем папку с изображениями
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
